@@ -21,14 +21,25 @@ app.use(express.static("public"));
 //To remove deprecation warning...
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/userdb", { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
 
-app.post("/submit", ({body}, res) => {
-  User.create(body)
-    .then(dbUser => {
-      res.json(dbUser);
-    })
-    .catch(err => {
-      res.json(err);
-    });
+app.post("/submit", async function (req, res){
+
+  const userInfo = req.body;
+  console.log(`User Info: `, userInfo)
+  try {
+    let resultData = await User.create(userInfo);
+    res.send(resultData);
+  } catch{
+    console.log( `...sorry there was an error inserting user info`, err)
+    res.send(err);
+  }
+// app.post("/submit", ({ body }, res) => {
+  // User.create(body)
+  //   .then(dbUser => {
+  //     res.json(dbUser);
+  //   })
+  //   .catch(err => {
+  //     res.json(err);
+  //   });
 });
 
 app.listen(PORT, () => {
