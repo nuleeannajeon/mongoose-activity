@@ -13,7 +13,7 @@ const UserSchema = new Schema({
     type: String,
     trim: true,
     required: true,
-    validate: [({ length }) => length >= 6, "Longstring should be longer."]
+    validate: [({ length }) => length >= 6, "Password should be longer."]
   },
 
   email: {

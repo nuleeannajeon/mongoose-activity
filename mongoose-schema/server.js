@@ -14,7 +14,12 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/userdb", { useNewUrlParser: true });
+// mongoose.set( 'useCreateIndex', true ); // to remove decprecation warning collection.ensureIndex
+// mongoose.connect( uri, { useCreateIndex: true });
+// mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/userdb", { useNewUrlParser: true });
+
+//To remove deprecation warning...
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/userdb", { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
 
 app.post("/submit", ({body}, res) => {
   User.create(body)
