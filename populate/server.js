@@ -17,6 +17,15 @@ app.use(express.static("public"));
 
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/userdb", { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
 
+// async function initDB(){
+//   try {
+//     let dbUser = await db.User.create({name: 'Ernest Hemingaway'})
+//   } catch (err) {
+//     console.log( `message: `, err.message )
+//   }
+// }
+// initDB();
+
 db.User.create({ name: "Ernest Hemingway" })
   .then(dbUser => {
     console.log(dbUser);
