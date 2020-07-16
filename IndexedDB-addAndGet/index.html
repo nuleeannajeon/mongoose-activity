@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Adding and Getting Data</title>
+  </head>
+
+  <body>
+    <h1>Open Your Developer Tools > Application > IndexedDB</h1>
+    <script>
+      const request = window.indexedDB.open("toDoList", 1);
+      
+      request.onupgradeneeded = event => {
+        const db = event.target.result;
+       // CODE HERE
+
+       const toDoListStore = db.createObjectStore("toDoList", {keyPath: "listID"});
+       toDoListStore.createIndex("dueDateIndex", "dueDate");
+       console.log( request )
+      }
+
+// * Create a `toDoList` object store with a `listID` keyPath that can be used to query on.
+
+// * Create an index for a "column" you"d like to query on. ie: due-date
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        // CODE HERE
+        const transaction = db.transaction(["toDoList"], "readwrite");
+        console.log( `transaction`, transaction )
+        const toDoListStore = transaction.objectStore("toDoList");
+        console.log( `toDoListStore`, toDoListStore )
+        const dueDateIndex = toDoListStore.index("dueDateIndex");
+        console.log( `dueDateIndex`, dueDateIndex )
+
+        toDoListStore.add({listID: "1", dueDate: "monday"});
+        toDoListStore.add({listID: "2", dueDate: "tuesday"});
+        toDoListStore.add({listID: "3", dueDate: "wednesday"});
+        toDoListStore.add({listID: "4", dueDate: "monday"});
+
+        const getRequestKey = toDoListStore.get("1");
+        getRequestKey.onsuccess = () => {
+          console.log(getRequestKey.result);
+        };
+
+        const getRequestIdx = dueDateIndex.getAll("monday");
+        getRequestIdx.onsuccess = () => {
+          console.log(getRequestIdx.result);
+        };
+      };
+
+// * Create variables for a new `transaction` on your database, `objectStore` and the `index` you created.
+
+// * Add four new items to your object store with the `add` method.
+
+// * Using the `get` method, return an item from your object store.
+
+// * Using the `getAll` method, query by index and return all items.
+    </script>
+  </body>
+</html>

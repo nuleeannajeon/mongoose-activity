@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Making An IndexedDB Connection</title>
+</head>
+
+<body>
+  <h1>Open Your Developer Tools > Application > IndexedDB</h1>
+</body>
+
+</html>
+
+<script type="module">
+  import { openDB, deleteDB } from 'https://unpkg.com/idb?module';
+
+  // source: https://github.com/jakearchibald/idb
+  // our main app
+  async function app() {
+    console.log(`starting app`);
+    // open database and initialize it
+    const db = await openDB('Articles', 1, {
+      upgrade(db) {
+        // Create a store of objects
+        const store = db.createObjectStore('articles', {
+          // The 'id' property of the object will be the key.
+          keyPath: 'id',
+          // If it isn't explicitly set, create a value by auto incrementing.
+          autoIncrement: true,
+        });
+        // Create an index on the 'date' property of the objects.
+        store.createIndex('dateIdx', 'date');
+      },
+    });
+
+    // Add an article:
+    console.log(`adding article`);
+    const result = await db.add('articles', {
+      title: 'Learning IndexDb 101',
+      date: new Date.now(),
+      body: 'This is all about learning to use indexdb',
+    });
+    console.log(`article added: `, result);
+
+
+    // // Get all the articles in date order:
+    const articleList = await db.getAllFromIndex('articles', 'dateIdx');
+    console.log(`articles: `, articleList);
+
+    // Add multiple articles in one transaction:
+    {
+      const tx = db.transaction('articles', 'readwrite');
+      tx.store.add({
+        title: 'Article 2',
+        date: new Date('2019-01-01'),
+        body: '…',
+      });
+      tx.store.add({
+        title: 'Article 3',
+        date: new Date('2019-01-02'),
+        body: '…',
+      });
+      await tx.done;
+    }
+
+    // Get all the articles in date order:
+    console.log(await db.getAllFromIndex('articles', 'dateIdx'));
+
+    // Add 'And, happy new year!' to all articles on 2019-01-01:
+    {
+      const tx = db.transaction('articles', 'readwrite');
+      const index = tx.store.index('date');
+
+      for await (const cursor of index.iterate(new Date('2019-01-01'))) {
+        const article = { ...cursor.value };
+        article.body += ' And, happy new year!';
+        cursor.update(article);
+      }
+
+      await tx.done;
+    }
+  }
+
+  app();
+
+</script>
